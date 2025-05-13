@@ -1,0 +1,102 @@
+﻿<!-- Главное окно почтового клиента -->
+<Window x:Class="mailbox.MailWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:mailbox"
+        mc:Ignorable="d"
+        Title="Почта" Icon="Pictures/Icon.ico" Height="750" Width="1150">
+    <!-- Основной Grid с разметкой окна -->
+    <Grid Background="LightBlue">
+        <!-- Определение колонок -->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="35"/>
+            <!-- Левая граница -->
+            <ColumnDefinition Width="230"/>
+            <!-- Панель навигации -->
+            <ColumnDefinition Width="350"/>
+            <!-- Список писем -->
+            <ColumnDefinition Width="0.5*"/>
+            <!-- Область просмотра письма -->
+            <ColumnDefinition Width="35"/>
+            <!-- Правая граница -->
+        </Grid.ColumnDefinitions>
+        <!-- Определение строк -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="35"/>
+            <!-- Верхняя панель -->
+            <RowDefinition/>
+            <!-- Основное содержимое -->
+            <RowDefinition Height="35"/>
+            <!-- Нижняя панель -->
+        </Grid.RowDefinitions>
+        <!-- Кнопка выхода -->
+        <Button x:Name="exitBtn" Margin="0, 5, 0, 0" Grid.Column="0" Grid.Row="0" 
+                Background="Transparent" BorderBrush="Transparent" Click="exitBtn_Click">
+            <Image Source="Pictures/logout.png"/>
+        </Button>
+        <!-- Кнопка создания нового сообщения -->
+        <Button x:Name="newMailBtn" Margin="5, 5, 5, 0" Grid.Column="1" Grid.Row="0" 
+                Background="Transparent" Click="newMailBtn_Click">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="Pictures/newmail.png"/>
+                <TextBlock Text="Новое сообщение" VerticalAlignment="Center" Margin="10,0,0,0"/>
+            </StackPanel>
+        </Button>
+        <!-- Панель навигации (папки) -->
+        <Border Grid.Column="1" Grid.Row="1" BorderBrush="Black" BorderThickness="1" Margin="5">
+            <Grid Background="Azure">
+                <StackPanel Orientation="Vertical">
+                    <Button Click="inboxbtn_Click" x:Name="inboxbtn" Background="Transparent" Height="50" 
+                            Content="Входящие" FontFamily="Calibri" FontSize="16" Margin="10, 10, 10, 10"/>
+                    <Button Click="sentbtn_Click" x:Name="sentbtn" Background="Transparent" Height="50" 
+                            Content="Исходящие" FontFamily="Calibri" FontSize="16" Margin="10, 0, 10, 10"/>
+                    <Button Click="draftsbtn_Click" x:Name="drafts" Background="Transparent" Height="50" 
+                            Content="Черновики" FontFamily="Calibri" FontSize="16" Margin="10, 0, 10, 10"/>
+                    <Button Click="junkbtn_Click" x:Name="junk" Background="Transparent" Height="50" 
+                            Content="Спам" FontFamily="Calibri" FontSize="16" Margin="10, 0, 10, 10"/>
+                    <Button Click="trashbtn_Click" x:Name="trash" Background="Transparent" Height="50" 
+                            Content="Корзина" FontFamily="Calibri" FontSize="16" Margin="10, 0, 10, 10"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        <!-- Область для отображения текста (скрыта по умолчанию) -->
+        <Border x:Name="borderTxt" Visibility="Hidden" Grid.Column="2" Grid.Row="1" 
+                BorderBrush="Black" BorderThickness="1" Margin="5">
+            <TextBlock x:Name="resultTxt" Background="Azure" FontFamily="Calibri" FontSize="16"/>
+        </Border>
+        <!-- Список писем (видим по умолчанию) -->
+        <Border x:Name="borderList" Visibility="Visible" Grid.Column="2" Grid.Row="1" 
+                BorderBrush="Black" BorderThickness="1" Margin="5">
+            <ListView x:Name="mainList" Background="Azure" ItemsSource="{Binding Messages}" 
+                      SelectionChanged="mainList_SelectionChanged">
+                <ListView.Resources>
+                    <!-- Шаблон для отображения письма в списке -->
+                    <DataTemplate DataType="{x:Type local:EmailMessage}">
+                        <StackPanel Margin="5">
+                            <TextBlock FontFamily="Calibri" FontSize="16" Text="{Binding Subject}" FontWeight="Bold"/>
+                            <TextBlock FontFamily="Calibri" FontSize="16" Text="{Binding From}" Foreground="Gray"/>
+                            <TextBlock FontFamily="Calibri" FontSize="16" Text="{Binding To}" Foreground="Gray"/>
+                            <TextBlock FontFamily="Calibri" FontSize="16" Text="{Binding Preview}" 
+                                       FontStyle="Italic" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock FontFamily="Calibri" FontSize="16" 
+                                       Text="{Binding Date, StringFormat='Дата: {0:dd.MM.yyyy}'}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                    <!-- Шаблон для кнопки "Загрузить еще" -->
+                    <DataTemplate DataType="{x:Type local:LoadMoreButton}">
+                        <Button Content="Загрузить ещё" 
+                                Click="LoadMore_Click"
+                                HorizontalAlignment="Center"
+                                Margin="5" Padding="10,5"/>
+                    </DataTemplate>
+                </ListView.Resources>
+            </ListView>
+        </Border>
+        <!-- Область просмотра письма (Frame для загрузки страниц) -->
+        <Border Grid.Column="3" Grid.Row="1" BorderBrush="Black" BorderThickness="1" Margin="5">
+            <Frame Background="Azure" x:Name="MainFrame"/>
+        </Border>
+    </Grid>
+</Window>
