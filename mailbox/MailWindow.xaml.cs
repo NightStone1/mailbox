@@ -263,7 +263,8 @@ namespace mailbox
                 }
             }
         }
-        private void DraftToMail()
+        // Перенсо черновика в форму отправки
+         private void DraftToMail()
         {
             if (_selectedMessage != null && MainFrame.Content is sendPage sendPage)
             {
@@ -354,7 +355,7 @@ namespace mailbox
                 }
             }
         }
-        // Скачивание вложения
+            // Создание письма
         private EmailMessage CreateEmailMessage(MimeMessage message)
         {
             var emailMessage = new EmailMessage
@@ -384,10 +385,10 @@ namespace mailbox
             }
             return emailMessage;
         }
-        // Получение полного текста сообщения
         //
         //Вспомогательные методы
         //
+            // Получение полного текста сообщения
         private string GetFullText(MimeMessage message)
         {
             if (!string.IsNullOrEmpty(message.TextBody))
@@ -398,7 +399,7 @@ namespace mailbox
 
             return "Нет текстового содержимого";
         }
-        // Получение краткого предпросмотра сообщения
+            // Получение краткого предпросмотра сообщения
         private string GetTextPreview(MimeMessage message)
         {
             string content = !string.IsNullOrEmpty(message.TextBody)
@@ -409,19 +410,19 @@ namespace mailbox
 
             return content.Length > 30 ? content.Substring(0, 30) + "..." : content;
         }
-        // Удаление HTML тегов из строки
+            // Удаление HTML тегов из строки
         private string StripHtml(string html)
         {
             return Regex.Replace(html, "<[^>]*>", string.Empty);
         }
-        // Подключение к IMAP серверу
+            // Подключение к IMAP серверу
         private void ConnectImap()
         {
             imap.ServerCertificateValidationCallback = (s, c, h, e) => true; // Игнорируем проверку сертификата
             imap.Connect(imapserver, 993, SecureSocketOptions.SslOnConnect); // Подключаемся с SSL
             imap.Authenticate(login, password); // Аутентификация
         }
-        // Перенос черновика в форму отправки        
+            // Скачивание вложений
         private void DownloadAttachment(AttachmentInfo attachment)
         {
             try
@@ -460,14 +461,14 @@ namespace mailbox
                 MessageBox.Show($"Ошибка при скачивании файла: {ex.Message}");
             }
         }
-        // Форматирование размера файла
+            // Форматирование размера файла
         private string FormatFileSize(long bytes)
         {
             if (bytes < 1024) return $"{bytes} B";
             if (bytes < 1024 * 1024) return $"{bytes / 1024} KB";
             return $"{bytes / (1024 * 1024)} MB";
         }
-        // Создание MimeMessage из данных формы
+            // Создание MimeMessage из данных формы
         private async Task<MimeMessage> CreateEmailMessage()
         {
             if (!(MainFrame.Content is sendPage page))
@@ -490,7 +491,7 @@ namespace mailbox
             message.Body = builder.ToMessageBody();
             return message;
         }
-        // Очистка формы отправки
+            // Очистка формы отправки
         private void ClearForm()
         {
             if (MainFrame.Content is sendPage page)
@@ -505,17 +506,17 @@ namespace mailbox
         //
         //Обработчики событий
         //
-        // Обработчики событий UI
+            // Обработчики событий UI
         private void exitBtn_Click(object sender, RoutedEventArgs e) => this.Close();
-        //
-        // Обработчики кнопок папок
-        //
+            //
+            // Обработчики кнопок папок
+            //
         private void inboxbtn_Click(object sender, RoutedEventArgs e) => secondSwitchFolder(() => imap.Inbox);
         private void sentbtn_Click(object sender, RoutedEventArgs e) => secondSwitchFolder(() => imap.GetFolder(SpecialFolder.Sent));
         private void draftsbtn_Click(object sender, RoutedEventArgs e) => secondSwitchFolder(() => imap.GetFolder(SpecialFolder.Drafts));
         private void junkbtn_Click(object sender, RoutedEventArgs e) => secondSwitchFolder(() => imap.GetFolder(SpecialFolder.Junk));
         private void trashbtn_Click(object sender, RoutedEventArgs e) => secondSwitchFolder(() => imap.GetFolder(SpecialFolder.Trash));
-        // Загрузка следующей пачки сообщений
+            // Загрузка следующей пачки сообщений
         private void LoadMore_Click(object sender, RoutedEventArgs e)
         {
             ConnectImap();
@@ -527,7 +528,7 @@ namespace mailbox
             _currentBatchIndex++;
             LoadMessagesBatch();
         }
-        // Обработчик выбора сообщения в списке
+            // Обработчик выбора сообщения в списке
         private void mainList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (mainList.SelectedItem is EmailMessage selectedMessage)
@@ -551,7 +552,7 @@ namespace mailbox
             if (imap.IsConnected)
                 imap.Disconnect(true);
         }
-        //обработчик события Navigated для элемента управления Frame
+            //обработчик события Navigated для элемента управления Frame
         private void MainFrame_Navigated(object sender, NavigationEventArgs e)
         {
             // Отписываемся от события Navigated
@@ -559,17 +560,17 @@ namespace mailbox
             // Вызываем метод обновления страницы письма
             UpdateMailPage();
         }
-        //
-        //Обработчики событий c sendPage
-        //
-        // Создание нового письма
+            //
+            //Обработчики событий c sendPage
+            //
+                // Создание нового письма
         private void newMailBtn_Click(object sender, RoutedEventArgs e)
         {
             ClearForm(); // очищаем форму
             MainFrame.Source = new Uri("Pages/sendPage.xaml", UriKind.Relative); //переключаемся на страницу отправки
             MainFrame.Navigated += OnSendPageNavigated; //подписываем события для MainFrame
         }
-        // Обработчики событий страницы отправки
+                // Обработчики событий страницы отправки
         private void OnSendPageNavigated(object sender, NavigationEventArgs e)
         {
             if (e.Content is sendPage page)
@@ -599,7 +600,7 @@ namespace mailbox
             ClearForm();
             DraftToMail();
         }
-        // Добавление вложений
+                // Добавление вложений
         private void OnAddAttachmentsClicked(object sender, EventArgs e)
         {
             if (MainFrame.Content is sendPage page)
@@ -636,7 +637,7 @@ namespace mailbox
                 }
             }
         }
-        // Отправка сообщения
+                // Отправка сообщения
         private async void OnSendMsgClicked(object sender, EventArgs e)
         {
             try
@@ -664,7 +665,7 @@ namespace mailbox
                 MessageBox.Show($"Error: {ex.GetType().Name} - {ex.Message}");
             }
         }
-        // Сохранение в черновики
+                // Сохранение в черновики
         private async void OnDraftMsgClicked(object sender, EventArgs e)
         {
             try
@@ -687,7 +688,7 @@ namespace mailbox
                 MessageBox.Show($"Error: {ex.Message}");
             }
         }
-        // Удаление сообщения
+                // Удаление сообщения
         private void OnDeleteMsgClicked(object sender, EventArgs e)
         {
             mainList.SelectedIndex = -1;
