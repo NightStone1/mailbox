@@ -670,13 +670,12 @@ namespace mailbox
         {
             try
             {
+                ConnectImap();
                 var message = await CreateEmailMessage();
                 if (message == null) return;
-
                 var draftsFolder = imap.GetFolder(SpecialFolder.Drafts);
                 await draftsFolder.OpenAsync(FolderAccess.ReadWrite);
                 await draftsFolder.AppendAsync(message, MessageFlags.Draft);
-
                 MessageBox.Show("Письмо сохранено в черновики!");
             }
             catch (ImapCommandException ex)
