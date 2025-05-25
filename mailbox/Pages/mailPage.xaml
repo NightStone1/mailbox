@@ -9,7 +9,21 @@
       d:DesignHeight="450" d:DesignWidth="800"
       Title="mail">
     <Grid Background="Azure">
-        <StackPanel Orientation="Vertical" Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="50"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Button Grid.Row="0" Grid.Column="2" x:Name="replayMsg" Width="25" Height="25" 
+                    Background="Transparent" BorderBrush="Transparent" Click="replayMsg_Click" ToolTip="Ответить" >
+            <Image Source="Pictures/reply.png"/>
+        </Button>
+        <StackPanel Grid.ColumnSpan="3" Grid.RowSpan="3" Orientation="Vertical" Margin="10,30,10,10">
             <!-- RichTextBox для отображения заголовков письма -->
             <RichTextBox x:Name="Mail" Visibility="Visible" IsReadOnly="True">
                 <FlowDocument>

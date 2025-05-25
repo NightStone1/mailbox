@@ -28,6 +28,8 @@ namespace mailbox
         public event EventHandler DraftMsgClicked;
         // Объявление события, которое будет вызываться при нажатии на кнопку "Удалить сообщение"
         public event EventHandler DeleteMsgClicked;
+        // Объявление события, которое будет вызываться при нажатии на кнопку "Закрыть сообщение"
+        public event EventHandler CloseMsgClicked;
         public sendPage()
         {
             InitializeComponent();
@@ -57,6 +59,11 @@ namespace mailbox
         {
             // Вызываем событие DeleteMsgClicked, если на него подписаны обработчики
             DeleteMsgClicked?.Invoke(this, EventArgs.Empty);
+        }
+        private void closeMsg_Click(object sender, RoutedEventArgs e)
+        {
+            // Вызываем событие closeMsg_Clicked, если на него подписаны обработчики
+            CloseMsgClicked?.Invoke(this, EventArgs.Empty);
         }
     }
 }

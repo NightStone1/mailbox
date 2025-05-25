@@ -24,5 +24,10 @@ namespace mailbox.Pages
         {
             InitializeComponent();
         }
+
+        private void replayMsg_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

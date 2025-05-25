@@ -33,7 +33,7 @@
         </Grid.RowDefinitions>
         <!-- Кнопка выхода -->
         <Button x:Name="exitBtn" Margin="0, 5, 0, 0" Grid.Column="0" Grid.Row="0" 
-                Background="Transparent" BorderBrush="Transparent" Click="exitBtn_Click">
+                Background="Transparent" BorderBrush="Transparent" Click="exitBtn_Click" ToolTip="Выход">
             <Image Source="Pictures/logout.png"/>
         </Button>
         <!-- Кнопка создания нового сообщения -->
@@ -50,6 +50,8 @@
                 <StackPanel Orientation="Vertical">
                     <Button Click="inboxbtn_Click" x:Name="inboxbtn" Background="Transparent" Height="50" 
                             Content="Входящие" FontFamily="Calibri" FontSize="16" Margin="10, 10, 10, 10"/>
+                    <Button Click="importantbtn_Click" x:Name="importantbtn" Background="Transparent" Height="50" 
+                            Content="Важные" FontFamily="Calibri" FontSize="16" Margin="10, 0, 10, 10"/>
                     <Button Click="sentbtn_Click" x:Name="sentbtn" Background="Transparent" Height="50" 
                             Content="Исходящие" FontFamily="Calibri" FontSize="16" Margin="10, 0, 10, 10"/>
                     <Button Click="draftsbtn_Click" x:Name="drafts" Background="Transparent" Height="50" 
@@ -69,20 +71,71 @@
         <!-- Список писем (видим по умолчанию) -->
         <Border x:Name="borderList" Visibility="Visible" Grid.Column="2" Grid.Row="1" 
                 BorderBrush="Black" BorderThickness="1" Margin="5">
-            <ListView x:Name="mainList" Background="Azure" ItemsSource="{Binding Messages}" 
+            <ListView Width="340" x:Name="mainList" Background="Azure" ItemsSource="{Binding Messages}" 
                       SelectionChanged="mainList_SelectionChanged">
                 <ListView.Resources>
                     <!-- Шаблон для отображения письма в списке -->
                     <DataTemplate DataType="{x:Type local:EmailMessage}">
-                        <StackPanel Margin="5">
-                            <TextBlock FontFamily="Calibri" FontSize="16" Text="{Binding Subject}" FontWeight="Bold"/>
-                            <TextBlock FontFamily="Calibri" FontSize="16" Text="{Binding From}" Foreground="Gray"/>
-                            <TextBlock FontFamily="Calibri" FontSize="16" Text="{Binding To}" Foreground="Gray"/>
-                            <TextBlock FontFamily="Calibri" FontSize="16" Text="{Binding Preview}" 
-                                       FontStyle="Italic" TextTrimming="CharacterEllipsis"/>
-                            <TextBlock FontFamily="Calibri" FontSize="16" 
-                                       Text="{Binding Date, StringFormat='Дата: {0:dd.MM.yyyy}'}"/>
-                        </StackPanel>
+                        <Grid Width="303">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="25"/>
+                                <ColumnDefinition Width="25"/>
+                                <ColumnDefinition Width="25"/>
+                                <ColumnDefinition Width="25"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="25"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <!-- Кнопка "Пометить как прочитанное" -->
+                            <Button Grid.Column="1" Grid.Row="0" 
+                                Command="{Binding DataContext.MarkAsReadCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                CommandParameter="{Binding}"
+                                Background="Transparent" BorderBrush="Transparent"
+                                ToolTip="{Binding ReadButtonToolTip}">
+                                <Image Source="{Binding ReadButtonImage}"/>
+                            </Button>
+                            <!-- Кнопка "Пометить как важное" -->
+                            <Button Grid.Column="2" Grid.Row="0" 
+                                Command="{Binding DataContext.MarkAsImportantCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                CommandParameter="{Binding}"
+                                Background="Transparent" BorderBrush="Transparent" 
+                                ToolTip="{Binding ImportantButtonToolTip}">
+                                <Image Source="{Binding ImportantButtonImage}"/>
+                            </Button>
+                            <!-- Кнопка "Спам" -->
+                            <Button Grid.Column="3" Grid.Row="0" 
+                                Command="{Binding DataContext.SpamCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                CommandParameter="{Binding}"
+                                Background="Transparent" BorderBrush="Transparent" 
+                                ToolTip="{Binding SpamButtonToolTip}">
+                                <Image Source="{Binding SpamButtonImage}"/>
+                            </Button>
+                            <!-- Кнопка "Удалить" -->
+                            <Button Grid.Column="4" Grid.RowSpan="2"
+                                Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                CommandParameter="{Binding}"
+                                Background="Transparent" BorderBrush="Transparent"                                 
+                                ToolTip="{Binding DeleteButtonToolTip}">
+                                <Image Source="{Binding DeleteButtonImage}"/>
+                            </Button>
+                            <!-- Основная информация о письме -->
+                            <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Margin="5">
+                                <TextBlock FontFamily="Calibri" FontSize="16" Text="{Binding Subject}" 
+                       FontWeight="{Binding FontWeight}"/>
+                                <TextBlock FontFamily="Calibri" FontSize="16" Text="{Binding From}" 
+                       Foreground="Gray" FontWeight="{Binding FontWeight}"/>
+                                <TextBlock FontFamily="Calibri" FontSize="16" Text="{Binding To}" 
+                       Foreground="Gray" FontWeight="{Binding FontWeight}"/>
+                                <TextBlock FontFamily="Calibri" FontSize="16" Text="{Binding Preview}" 
+                       FontStyle="Italic" TextTrimming="CharacterEllipsis"
+                       FontWeight="{Binding FontWeight}"/>
+                                <TextBlock FontFamily="Calibri" FontSize="16" 
+                       Text="{Binding Date, StringFormat='Дата: {0:dd.MM.yyyy}'}"
+                       FontWeight="{Binding FontWeight}"/>
+                            </StackPanel>
+                        </Grid>
                     </DataTemplate>
                     <!-- Шаблон для кнопки "Загрузить еще" -->
                     <DataTemplate DataType="{x:Type local:LoadMoreButton}">

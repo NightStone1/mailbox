@@ -31,17 +31,20 @@
         </Grid.ColumnDefinitions>
         <!-- Панель кнопок действий (сохранить в черновики, удалить) -->
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" Orientation="Horizontal">
-            <Button x:Name="draftMsg" Width="25" Height="25" Margin="5,0,10,0" 
-                    Background="Transparent" BorderBrush="Transparent" Click="draftMsg_Click">
+            <Button x:Name="draftMsg" Width="25" Height="25"
+                    Background="Transparent" BorderBrush="Transparent" Click="draftMsg_Click" ToolTip="Сохранить в черновики">
                 <Image Source="Pictures/draft.png"/>
             </Button>
-            <Button x:Name="deleteMsg" Width="25" Height="25" Margin="0,0,5,0" 
-                    Background="Transparent" BorderBrush="Transparent" Click="deleteMsg_Click">
+            <Button x:Name="deleteMsg" Width="25" Height="25"
+                    Background="Transparent" BorderBrush="Transparent" Click="deleteMsg_Click" ToolTip="Удалить черновик">
                 <Image Source="Pictures/delete.png"/>
+            </Button>
+            <Button x:Name="closeMsg" Width="25" Height="25" 
+                    Background="Transparent" BorderBrush="Transparent" Click="closeMsg_Click" ToolTip="Выйти из черновика" Content="×">
             </Button>
         </StackPanel>
         <!-- Заголовок страницы -->
-        <Label Grid.Row="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center"  
+        <Label Grid.Row="0" Grid.ColumnSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center"  
                Content="Новое сообщение" FontFamily="Calibri" FontSize="16" />
         <!-- Поле "Кому" -->
         <Label Grid.Row="1" Grid.Column="0" Content="Кому:" VerticalAlignment="Center" FontFamily="Calibri" FontSize="16" />
