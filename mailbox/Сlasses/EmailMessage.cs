@@ -19,7 +19,6 @@ namespace mailbox
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-        // Путь к картинке (просто строка)
         public UniqueId UniqueId { get; set; }
         public string Subject { get; set; }
         public string From { get; set; }
