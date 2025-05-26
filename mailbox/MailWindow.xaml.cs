@@ -237,6 +237,7 @@ namespace mailbox
         {
             try
             {
+                MainFrame.Content = null;
                 // Устанавливаем соединение с IMAP сервером
                 ConnectImap();
                 // Вызываем основной метод переключения
@@ -701,7 +702,7 @@ namespace mailbox
             }
             MainFrame.Navigated -= OnSendPageNavigated;
             ClearForm();
-            _selectedMessage = null;
+            //_selectedMessage = null;
             DraftToMail();
         }
         // Добавление вложений
