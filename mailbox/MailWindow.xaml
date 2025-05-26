@@ -6,7 +6,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:mailbox"
         mc:Ignorable="d"
-        Title="Почта" Icon="Pictures/Icon.ico" Height="750" Width="1150">
+        Title="Почтовый ящик MailBox" Icon="Pictures/Icon.ico" Height="750" Width="1150">
     <!-- Основной Grid с разметкой окна -->
     <Grid Background="LightBlue">
         <!-- Определение колонок -->
