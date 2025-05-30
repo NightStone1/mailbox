@@ -48,18 +48,78 @@
         <Border Grid.Column="1" Grid.Row="1" BorderBrush="Black" BorderThickness="1" Margin="5">
             <Grid Background="Azure">
                 <StackPanel Orientation="Vertical">
-                    <Button Click="inboxbtn_Click" x:Name="inboxbtn" Background="Transparent" Height="50" 
-                            Content="Входящие" FontFamily="Calibri" FontSize="16" Margin="10, 10, 10, 10"/>
-                    <Button Click="importantbtn_Click" x:Name="importantbtn" Background="Transparent" Height="50" 
-                            Content="Важные" FontFamily="Calibri" FontSize="16" Margin="10, 0, 10, 10"/>
-                    <Button Click="sentbtn_Click" x:Name="sentbtn" Background="Transparent" Height="50" 
-                            Content="Исходящие" FontFamily="Calibri" FontSize="16" Margin="10, 0, 10, 10"/>
-                    <Button Click="draftsbtn_Click" x:Name="drafts" Background="Transparent" Height="50" 
-                            Content="Черновики" FontFamily="Calibri" FontSize="16" Margin="10, 0, 10, 10"/>
-                    <Button Click="junkbtn_Click" x:Name="junk" Background="Transparent" Height="50" 
-                            Content="Спам" FontFamily="Calibri" FontSize="16" Margin="10, 0, 10, 10"/>
-                    <Button Click="trashbtn_Click" x:Name="trash" Background="Transparent" Height="50" 
-                            Content="Корзина" FontFamily="Calibri" FontSize="16" Margin="10, 0, 10, 10"/>
+                    <Button  Click="inboxbtn_Click" x:Name="inboxbtn" Background="Transparent" Height="50" Margin="10, 10, 10, 10">
+                        <Grid Height="50" Width="195">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="25"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="2" Text="Входящие" FontFamily="Calibri" FontSize="16" VerticalAlignment="Center" />
+                            <Image Grid.Column="1" Width="25" Height="25" Source="Pictures/Read.png" VerticalAlignment="Center"/>
+                            <Border x:Name="inboxflg"/>
+                        </Grid>
+                    </Button>
+                    <Button  Click="importantbtn_Click" x:Name="importantbtn" Background="Transparent" Height="50" Margin="10, 0, 10, 10">
+                        <Grid Height="50" Width="195">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="25"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="2" Text="Важные" FontFamily="Calibri" FontSize="16" VerticalAlignment="Center" />
+                            <Image Grid.Column="1" Width="25" Height="25" Source="Pictures/unMark.png" VerticalAlignment="Center"/> 
+                            <Border x:Name="impflg"/>
+                        </Grid>
+                    </Button>
+                    <Button  Click="sentbtn_Click" x:Name="sentbtn" Background="Transparent" Height="50" Margin="10, 0, 10, 10">
+                        <Grid Height="50" Width="195">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="25"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="2" Text="Исходящие" FontFamily="Calibri" FontSize="16" VerticalAlignment="Center" />
+                            <Image Grid.Column="1" Width="25" Height="25" Source="Pictures/sent.png"  Margin="0,8,0,0"/>
+                            <Border x:Name="sentflg"/>
+                        </Grid>
+                    </Button>
+                    <Button  Click="draftsbtn_Click" x:Name="drafts" Background="Transparent" Height="50" Margin="10, 0, 10, 10">
+                        <Grid Height="50" Width="195">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="25"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="2" Text="Черновики" FontFamily="Calibri" FontSize="16" VerticalAlignment="Center" />
+                            <Image Grid.Column="1" Width="25" Height="25" Source="Pictures/draft.png" VerticalAlignment="Center"/>
+                            <Border x:Name="draftsflg"/>
+                        </Grid>
+                    </Button>
+                    <Button  Click="junkbtn_Click" x:Name="junk" Background="Transparent" Height="50" Margin="10, 0, 10, 10">
+                        <Grid Height="50" Width="195">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="25"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="2" Text="Спам" FontFamily="Calibri" FontSize="16" VerticalAlignment="Center" />
+                            <Image Grid.Column="1" Width="25" Height="25" Source="Pictures/unspam.png" VerticalAlignment="Center"/>
+                            <Border x:Name="junkflg"/>
+                        </Grid>
+                    </Button>
+                    <Button  Click="trashbtn_Click" x:Name="trash" Background="Transparent" Height="50" Margin="10, 0, 10, 10">
+                        <Grid Height="50" Width="195">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="25"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="2" Text="Корзина" FontFamily="Calibri" FontSize="16" VerticalAlignment="Center" />
+                            <Image Grid.Column="1" Width="25" Height="25" Source="Pictures/delete.png" VerticalAlignment="Center"/>
+                            <Border x:Name="trashflg"/>
+                        </Grid>
+                    </Button>
                 </StackPanel>
             </Grid>
         </Border>

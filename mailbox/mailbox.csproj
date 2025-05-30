@@ -15,8 +15,10 @@
     <None Remove="mark.png" />
     <None Remove="newmail.png" />
     <None Remove="Pictures\delete.png" />
+    <None Remove="Pictures\draft.png" />
     <None Remove="Pictures\logout.png" />
     <None Remove="Pictures\recove.png" />
+    <None Remove="Pictures\sent.png" />
     <None Remove="Pictures\spam.png" />
     <None Remove="Pictures\unspam.png" />
     <None Remove="read.png" />
@@ -32,6 +34,12 @@
 
   <ItemGroup>
     <Resource Include="Pictures\delete.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Pictures\draft.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Pictures\sent.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Pictures\spam.png">

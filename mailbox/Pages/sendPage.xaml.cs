@@ -39,7 +39,6 @@ namespace mailbox
         private void addAttachments_Click(object sender, RoutedEventArgs e)
         {
             // Вызываем событие AddAttachmentsClicked, если на него подписаны обработчики
-            // Оператор "?." - это условный вызов.  Он гарантирует, что событие не будет вызвано, если оно равно null (т.е. нет подписанных обработчиков).
             AddAttachmentsClicked?.Invoke(this, EventArgs.Empty);
         }
         // Обработчик события нажатия на кнопку "Отправить сообщение"

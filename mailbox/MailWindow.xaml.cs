@@ -13,6 +13,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Navigation;
 using System.Xml;
 
@@ -26,7 +27,17 @@ namespace mailbox
     {
         //
         // Поля
-        //
+        //        
+            // Поля для "узнавания" текущей папки
+        private bool inboxFlag = false;
+        private bool impFlag = false;
+        private bool sentFlag = false;
+        private bool draftsFlag = false;
+        private bool junkFlag = false;
+        private bool trashFlag = false;
+            // Кисти
+        private Brush C_black = Brushes.Black;
+        private Brush C_trsnt = Brushes.Transparent;
             // Команды для кнопок в списке писем
         public ICommand MarkAsReadCommand { get; }
         public ICommand MarkAsImportantCommand { get; }
@@ -57,8 +68,8 @@ namespace mailbox
             this.password = password;
             this.DataContext = this;
             // Инициализируем команды
-            MarkAsReadCommand = new RelayCommand(MarkAsRead); 
-            DeleteCommand = new RelayCommand(OnDelete);        
+            MarkAsReadCommand = new RelayCommand(MarkAsRead);
+            DeleteCommand = new RelayCommand(OnDelete);
             MarkAsImportantCommand = new RelayCommand(OnMarkAsImportant);
             SpamCommand = new RelayCommand(OnSpam);
             MainFrame.NavigationUIVisibility = NavigationUIVisibility.Hidden;
@@ -112,7 +123,7 @@ namespace mailbox
 
                     if (email.IsImportant == false)
                     {
-                        folder.AddFlags(email.UniqueId, MessageFlags.Flagged, true);                        
+                        folder.AddFlags(email.UniqueId, MessageFlags.Flagged, true);
                         email.IsImportant = true;
                     }
                     else
@@ -120,7 +131,7 @@ namespace mailbox
                         folder.AddFlags(email.UniqueId, MessageFlags.Flagged, false);
                         email.IsImportant = false;
                         if (_currentFolder == imap.GetFolder(SpecialFolder.Flagged))
-                        Messages.Remove(email);
+                            _messages.Remove(email);
                     }
                 }
                 catch (Exception ex)
@@ -150,14 +161,14 @@ namespace mailbox
                     {
                         currentFolder.Open(FolderAccess.ReadWrite);
                         currentFolder.MoveTo(email.UniqueId, trashFolder);
-                        Messages.Remove(email);
+                        _messages.Remove(email);
                         email.IsDeleted = true;
                     }
                     else
                     {
                         currentFolder.Open(FolderAccess.ReadWrite);
                         currentFolder.MoveTo(email.UniqueId, imap.Inbox);
-                        Messages.Remove(email);
+                        _messages.Remove(email);
                         email.IsDeleted = false;
                     }
                 }
@@ -187,15 +198,15 @@ namespace mailbox
                     {
                         currentFolder.Open(FolderAccess.ReadWrite);
                         currentFolder.MoveTo(email.UniqueId, junkFolder);
-                        Messages.Remove(email);
+                        _messages.Remove(email);
                         email.IsSpam = true;
                     }
                     else
                     {
                         currentFolder.Open(FolderAccess.ReadWrite);
                         currentFolder.MoveTo(email.UniqueId, imap.Inbox);
-                        Messages.Remove(email);
-                        email.IsSpam= false;
+                        _messages.Remove(email);
+                        email.IsSpam = false;
                     }
                 }
                 catch (Exception ex)
@@ -235,6 +246,7 @@ namespace mailbox
         // Вспомогательный метод для переключения папки
         private void secondSwitchFolder(Func<IMailFolder> folderSelector)
         {
+            CheckFlag();
             try
             {
                 MainFrame.Content = null;
@@ -467,7 +479,40 @@ namespace mailbox
         //
         //Вспомогательные методы
         //
-            // Получение полного текста сообщения
+        private void CheckFlag()
+        {
+            if (inboxFlag)//
+                inboxflg.Background = C_black;
+            else
+                inboxflg.Background = C_trsnt;
+            if (impFlag)//
+                impflg.Background = C_black;
+            else
+                impflg.Background = C_trsnt;
+            if (sentFlag)//
+                sentflg.Background = C_black;
+            else
+                sentflg.Background = C_trsnt;
+            if (draftsFlag)//
+                draftsflg.Background = C_black;
+            else
+                draftsflg.Background = C_trsnt;
+            if (junkFlag)//
+                junkflg.Background = C_black;
+            else
+                junkflg.Background = C_trsnt;
+            if (trashFlag)//
+                trashflg.Background = C_black;
+            else
+                trashflg.Background = C_trsnt;
+            inboxFlag = false;
+            impFlag = false;
+            sentFlag = false;
+            draftsFlag = false;
+            junkFlag = false;
+            trashFlag = false;
+        }
+        // Получение полного текста сообщения
         private string GetFullText(MimeMessage message)
         {
             if (!string.IsNullOrEmpty(message.TextBody))
@@ -478,7 +523,7 @@ namespace mailbox
 
             return "Нет текстового содержимого";
         }
-            // Получение краткого предпросмотра сообщения
+        // Получение краткого предпросмотра сообщения
         private string GetTextPreview(MimeMessage message)
         {
             string content = !string.IsNullOrEmpty(message.TextBody)
@@ -489,12 +534,12 @@ namespace mailbox
 
             return content.Length > 30 ? content.Substring(0, 30) + "..." : content;
         }
-            // Удаление HTML тегов из строки
+        // Удаление HTML тегов из строки
         private string StripHtml(string html)
         {
             return Regex.Replace(html, "<[^>]*>", string.Empty);
         }
-            // Подключение к IMAP серверу
+        // Подключение к IMAP серверу
         private void ConnectImap()
         {
             try
@@ -508,7 +553,7 @@ namespace mailbox
                 MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
-            // Скачивание вложений
+        // Скачивание вложений
         private void DownloadAttachment(AttachmentInfo attachment)
         {
             try
@@ -547,14 +592,14 @@ namespace mailbox
                 MessageBox.Show($"Ошибка при скачивании файла: {ex.Message}");
             }
         }
-            // Форматирование размера файла
+        // Форматирование размера файла
         private string FormatFileSize(long bytes)
         {
             if (bytes < 1024) return $"{bytes} B";
             if (bytes < 1024 * 1024) return $"{bytes / 1024} KB";
             return $"{bytes / (1024 * 1024)} MB";
         }
-            // Создание MimeMessage из данных формы
+        // Создание MimeMessage из данных формы
         private async Task<MimeMessage> CreateEmailMessage()
         {
             if (!(MainFrame.Content is sendPage page))
@@ -577,7 +622,7 @@ namespace mailbox
             message.Body = builder.ToMessageBody();
             return message;
         }
-            // Очистка формы отправки
+        // Очистка формы отправки
         private void ClearForm()
         {
             if (MainFrame.Content is sendPage page)
@@ -592,17 +637,41 @@ namespace mailbox
         //
         //Обработчики событий
         //
-            // Обработчики событий UI
+        // Обработчики событий UI
         private void exitBtn_Click(object sender, RoutedEventArgs e) => this.Close();
-            //
-            // Обработчики кнопок папок
-            //
-        private void inboxbtn_Click(object sender, RoutedEventArgs e) => secondSwitchFolder(() => imap.Inbox);
-        private void importantbtn_Click(object sender, RoutedEventArgs e) => secondSwitchFolder(() => imap.GetFolder(SpecialFolder.Flagged));
-        private void sentbtn_Click(object sender, RoutedEventArgs e) => secondSwitchFolder(() => imap.GetFolder(SpecialFolder.Sent));
-        private void draftsbtn_Click(object sender, RoutedEventArgs e) => secondSwitchFolder(() => imap.GetFolder(SpecialFolder.Drafts));
-        private void junkbtn_Click(object sender, RoutedEventArgs e) => secondSwitchFolder(() => imap.GetFolder(SpecialFolder.Junk));
-        private void trashbtn_Click(object sender, RoutedEventArgs e) => secondSwitchFolder(() => imap.GetFolder(SpecialFolder.Trash));
+        //
+        // Обработчики кнопок папок
+        //
+        private void inboxbtn_Click(object sender, RoutedEventArgs e)
+        {
+            inboxFlag = true;
+            secondSwitchFolder(() => imap.Inbox);            
+        }
+        private void importantbtn_Click(object sender, RoutedEventArgs e) 
+        {
+            impFlag = true;
+            secondSwitchFolder(() => imap.GetFolder(SpecialFolder.Flagged));            
+        }
+        private void sentbtn_Click(object sender, RoutedEventArgs e) 
+        {
+            sentFlag = true;
+            secondSwitchFolder(() => imap.GetFolder(SpecialFolder.Sent));
+        }
+        private void draftsbtn_Click(object sender, RoutedEventArgs e) 
+        {
+            draftsFlag = true;
+            secondSwitchFolder(() => imap.GetFolder(SpecialFolder.Drafts)); 
+        }
+        private void junkbtn_Click(object sender, RoutedEventArgs e) 
+        {
+            junkFlag = true;
+            secondSwitchFolder(() => imap.GetFolder(SpecialFolder.Junk));
+        }
+        private void trashbtn_Click(object sender, RoutedEventArgs e) 
+        {
+            trashFlag = true;
+            secondSwitchFolder(() => imap.GetFolder(SpecialFolder.Trash)); 
+        }
             // Загрузка следующей пачки сообщений
         private void LoadMore_Click(object sender, RoutedEventArgs e)
         {

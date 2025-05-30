@@ -20,6 +20,8 @@ namespace mailbox.Pages
     /// </summary>
     public partial class mailPage : Page
     {
+        // Объявление события, которое будет вызываться при нажатии на кнопку "Ответить"
+        public event EventHandler replayClicked;
         public mailPage()
         {
             InitializeComponent();
@@ -27,7 +29,8 @@ namespace mailbox.Pages
 
         private void replayMsg_Click(object sender, RoutedEventArgs e)
         {
-
+            // Вызываем событие replayClicked, если на него подписаны обработчики
+            replayClicked?.Invoke(this, EventArgs.Empty);
         }
     }
 }
