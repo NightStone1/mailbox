@@ -57,6 +57,7 @@ namespace mailbox
         private bool _isProcessing = false; // Флаг выполнения операции
         private ImapClient imap = new ImapClient(); // Клиент IMAP
         private List<AttachmentInfo> _attachments = new List<AttachmentInfo>(); // Список вложений
+        private IMailFolder sentFolder;
         // Конструктор окна
         public MailWindow(string login, string password, string imapserver, string smtpserver)
         {
@@ -381,6 +382,10 @@ namespace mailbox
         {
             if (_selectedMessage != null && MainFrame.Content is mailPage mailPage)
             {
+                if (_currentFolder == sentFolder)
+                {
+                    mailPage.replayMsg.Visibility = Visibility.Hidden;
+                }
                 // Заполняем заголовки
                 mailPage.subjectMail.Inlines.Clear();
                 mailPage.subjectMail.Inlines.Add(new Run("Тема: ") { FontWeight = FontWeights.Bold });
@@ -547,6 +552,10 @@ namespace mailbox
                 imap.ServerCertificateValidationCallback = (s, c, h, e) => true; // Игнорируем проверку сертификата
                 imap.Connect(imapserver, 993, SecureSocketOptions.SslOnConnect); // Подключаемся с SSL
                 imap.Authenticate(login, password); // Аутентификация
+                if (_currentFolder == imap.GetFolder(SpecialFolder.Sent))
+                {
+                    sentFolder = imap.GetFolder(SpecialFolder.Sent);
+                }
             }
             catch (Exception ex)
             {
@@ -709,7 +718,7 @@ namespace mailbox
                     else // Иначе - страницу просмотра
                     {
                         MainFrame.Navigated += MainFrame_Navigated;
-                        MainFrame.Source = new Uri("Pages/mailPage.xaml", UriKind.Relative);
+                        MainFrame.Source = new Uri("Pages/mailPage.xaml", UriKind.Relative);                        
                     }
                 }
                     
@@ -759,6 +768,7 @@ namespace mailbox
                 page.SendMsgClicked += OnSendMsgClicked;
                 page.DraftMsgClicked += OnDraftMsgClicked;
                 page.DeleteMsgClicked += OnDeleteMsgClicked;
+                page.CloseMsgClicked += onCloseMsgClicked;
 
                 // Отписка при выгрузке страницы
                 page.Unloaded += (s, args) =>
@@ -767,6 +777,7 @@ namespace mailbox
                     page.SendMsgClicked -= OnSendMsgClicked;
                     page.DraftMsgClicked -= OnDraftMsgClicked;
                     page.DeleteMsgClicked -= OnDeleteMsgClicked;
+                    page.CloseMsgClicked -= onCloseMsgClicked;
                 };
             }
             MainFrame.Navigated -= OnSendPageNavigated;
@@ -776,7 +787,13 @@ namespace mailbox
         }
         // Добавление вложений
         private void onCloseMsgClicked(object sender, EventArgs e)
-        { }
+        {
+            ClearForm(); // очищаем форму
+            _selectedMessage = null;
+            mainList.SelectedIndex = -1;
+            MainFrame.NavigationService?.RemoveBackEntry();
+            MainFrame.Content = null;
+        }
         private void OnAddAttachmentsClicked(object sender, EventArgs e)
         {
             if (MainFrame.Content is sendPage page)
@@ -867,10 +884,7 @@ namespace mailbox
                 // Удаление сообщения
         private void OnDeleteMsgClicked(object sender, EventArgs e)
         {
-            _selectedMessage = null;
-            mainList.SelectedIndex = -1;
-            MainFrame.NavigationService?.RemoveBackEntry();
-            MainFrame.Content = null;
+
         }        
     }
 }
