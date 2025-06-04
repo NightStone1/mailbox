@@ -14,6 +14,7 @@ using MailKit.Security;
 using MailKit;
 using MailKit.Net.Smtp;
 using System.Configuration;
+using mailbox.Сlasses;
 //using System.Net.Mail;
 
 namespace mailbox
@@ -21,35 +22,7 @@ namespace mailbox
     /// <summary>
     /// Interaction logic for LoginWindow.xaml
     /// </summary>
-    public class DataProtection
-    {
-        //Шифруем пароль
-        public string Protect(string str) 
-        {
-            byte[] data = ProtectedData.Protect(Encoding.UTF8.GetBytes(str), null, DataProtectionScope.CurrentUser);
-            return Convert.ToBase64String(data);
-        }
-        //Расшифровываем пароль
-        public string Unprotect(string encryptedData)
-        {
-            try
-            {
-                byte[] data = Convert.FromBase64String(encryptedData);
-                byte[] unprotectedData = ProtectedData.Unprotect(data, null, DataProtectionScope.CurrentUser);
-                return Encoding.UTF8.GetString(unprotectedData);
-            }
-            catch (CryptographicException)
-            {
-                // Обработка ошибки дешифрования
-                return null;
-            }
-            catch (FormatException)
-            {
-                // Обработка ошибки формата
-                return null;
-            }
-        }
-    }
+    
     public partial class LoginWindow : Window
     {
         private DataProtection dataProtection;

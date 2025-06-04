@@ -43,6 +43,7 @@ namespace mailbox
         public ICommand MarkAsImportantCommand { get; }
         public ICommand DeleteCommand { get; }
         public ICommand SpamCommand { get; }
+        bool _reply = false;
         string imapserver;     // Сервер IMAP для получения почты
         string smtpserver;     // Сервер SMTP для отправки почты
         string password;       // Пароль пользователя
@@ -58,6 +59,7 @@ namespace mailbox
         private ImapClient imap = new ImapClient(); // Клиент IMAP
         private List<AttachmentInfo> _attachments = new List<AttachmentInfo>(); // Список вложений
         private IMailFolder sentFolder;
+        private IMailFolder draftFolder;
         // Конструктор окна
         public MailWindow(string login, string password, string imapserver, string smtpserver)
         {
@@ -353,28 +355,40 @@ namespace mailbox
             if (_selectedMessage != null && MainFrame.Content is sendPage sendPage)
             {
                 // Заполняем поля формы
-                sendPage.sendTo.Text = _selectedMessage.To;
+                if (_reply)
+                {
+                    Match match = Regex.Match(_selectedMessage.From, @"<([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})>");
+                    sendPage.sendTo.Text = match.Groups[1].Value;
+                }
+                else 
+                {
+                    sendPage.sendTo.Text = _selectedMessage.To;
+                }                
                 sendPage.subject.Text = _selectedMessage.Subject;
                 sendPage.textToSend.Text = _selectedMessage.FullText;
                 // Добавляем вложения
-                foreach (var attachment in _selectedMessage.Attachments)
+                if (_selectedMessage.Attachments != null)
                 {
-                    AttachmentHelper.AddAttachmentToPanel(
-                        sendPage.attachmentsPanel,
-                        attachment,
-                        _attachments,
-                        a =>
-                        {
-                            _attachments.Remove(a);
-                            // Удаляем StackPanel с кнопкой вложения
-                            var panelToRemove = sendPage.attachmentsPanel.Children
-                                .OfType<StackPanel>()
-                                .FirstOrDefault(p => p.Children.OfType<Button>().Any(b => b.Tag == a));
-                            if (panelToRemove != null)
-                                sendPage.attachmentsPanel.Children.Remove(panelToRemove);
-                        }
-                    );
+                    foreach (var attachment in _selectedMessage.Attachments)
+                    {
+                        AttachmentHelper.AddAttachmentToPanel(
+                            sendPage.attachmentsPanel,
+                            attachment,
+                            _attachments,
+                            a =>
+                            {
+                                _attachments.Remove(a);
+                                // Удаляем StackPanel с кнопкой вложения
+                                var panelToRemove = sendPage.attachmentsPanel.Children
+                                    .OfType<StackPanel>()
+                                    .FirstOrDefault(p => p.Children.OfType<Button>().Any(b => b.Tag == a));
+                                if (panelToRemove != null)
+                                    sendPage.attachmentsPanel.Children.Remove(panelToRemove);
+                            }
+                        );
+                    }
                 }
+                
             }
         }
         // Обновление страницы просмотра письма
@@ -552,10 +566,8 @@ namespace mailbox
                 imap.ServerCertificateValidationCallback = (s, c, h, e) => true; // Игнорируем проверку сертификата
                 imap.Connect(imapserver, 993, SecureSocketOptions.SslOnConnect); // Подключаемся с SSL
                 imap.Authenticate(login, password); // Аутентификация
-                if (_currentFolder == imap.GetFolder(SpecialFolder.Sent))
-                {
-                    sentFolder = imap.GetFolder(SpecialFolder.Sent);
-                }
+                sentFolder = imap.GetFolder(SpecialFolder.Sent);
+                draftFolder = imap.GetFolder(SpecialFolder.Drafts);
             }
             catch (Exception ex)
             {
@@ -614,6 +626,27 @@ namespace mailbox
             if (!(MainFrame.Content is sendPage page))
                 return null;
             var message = new MimeMessage();
+            if (_reply)
+            {
+                try
+                {
+                    _reply = false;
+                    ConnectImap();
+                    imap.Inbox.Open(FolderAccess.ReadOnly);
+                    var original = imap.Inbox.GetMessage(_selectedMessage.UniqueId);
+                    // Создаем ответ
+                    message.InReplyTo = original.MessageId;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка: {ex.Message}");
+                }
+                finally
+                {
+                    if (imap.IsConnected)
+                        imap.Disconnect(true);
+                }                
+            }
             message.From.Add(new MailboxAddress("", login));
             if (!string.IsNullOrEmpty(page.sendTo.Text))
                 message.To.Add(new MailboxAddress("", page.sendTo.Text));
@@ -736,10 +769,32 @@ namespace mailbox
             //обработчик события Navigated для элемента управления Frame
         private void MainFrame_Navigated(object sender, NavigationEventArgs e)
         {
+            if (e.Content is mailPage page)
+            {
+                // отписка на события страницы просмотра
+                page.replayClicked -= OnReplayClicked;
+                // подписка на события страницы просмотра
+                page.replayClicked += OnReplayClicked;
+                // Отписка при выгрузке страницы
+                page.Unloaded += (s, args) =>
+                {
+                    page.replayClicked -= OnReplayClicked;
+                };
+            }
             // Отписываемся от события Navigated
             MainFrame.Navigated -= MainFrame_Navigated;
             // Вызываем метод обновления страницы письма
             UpdateMailPage();
+        }
+        private void OnReplayClicked(object sender, EventArgs e)
+        {
+            MainFrame.Source = new Uri("Pages/sendPage.xaml", UriKind.Relative); //переключаемся на страницу отправки
+            MainFrame.Navigated += OnSendPageNavigated; //подписываем события для MainFrame
+            mainList.SelectedIndex = -1;
+            _selectedMessage.FullText = "";
+            _selectedMessage.Subject = "";
+            _reply = true;
+            _selectedMessage.Attachments.Clear();
         }
             //
             //Обработчики событий c sendPage
@@ -785,15 +840,7 @@ namespace mailbox
             //_selectedMessage = null;
             DraftToMail();
         }
-        // Добавление вложений
-        private void onCloseMsgClicked(object sender, EventArgs e)
-        {
-            ClearForm(); // очищаем форму
-            _selectedMessage = null;
-            mainList.SelectedIndex = -1;
-            MainFrame.NavigationService?.RemoveBackEntry();
-            MainFrame.Content = null;
-        }
+        // Добавление вложений        
         private void OnAddAttachmentsClicked(object sender, EventArgs e)
         {
             if (MainFrame.Content is sendPage page)
@@ -884,7 +931,40 @@ namespace mailbox
                 // Удаление сообщения
         private void OnDeleteMsgClicked(object sender, EventArgs e)
         {
-
-        }        
+            try
+            {
+                if ((_currentFolder == draftFolder) && (_selectedMessage != null))
+                {
+                    ConnectImap();
+                    var trashFolder = imap.GetFolder(SpecialFolder.Trash);
+                    var currentFolder = _currentFolder;
+                    currentFolder.Open(FolderAccess.ReadWrite);
+                    currentFolder.MoveTo(_selectedMessage.UniqueId, trashFolder);
+                    _messages.Remove(_selectedMessage);
+                }                
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
+            }
+            finally
+            {
+                if (imap.IsConnected)
+                    imap.Disconnect(true);
+                ClearForm(); // очищаем форму
+                _selectedMessage = null;
+                mainList.SelectedIndex = -1;
+                MainFrame.NavigationService?.RemoveBackEntry();
+                MainFrame.Content = null;
+            }
+        }
+        private void onCloseMsgClicked(object sender, EventArgs e)
+        {
+            ClearForm(); // очищаем форму
+            _selectedMessage = null;
+            mainList.SelectedIndex = -1;
+            MainFrame.NavigationService?.RemoveBackEntry();
+            MainFrame.Content = null;
+        }
     }
 }
